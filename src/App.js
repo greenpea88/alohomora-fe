@@ -1,16 +1,19 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
-import LoadingModal from "./components/loadingModal";
+import axios from "axios";
+import React, { useCallback, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { debounce } from "lodash";
+import { ethers } from "ethers";
+import AirDropModal from "./components/airdropModal";
 
 function App() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [accountAddress, setAccountAddress] = useState("");
-  const [tokenId, setTokenId] = useState("");
   const [type, setType] = useState("");
 
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [validAddress, setValidAddress] = useState(false);
 
   useEffect(() => {
     // page에 접근할 때 query param으로 들어온 값을 읽음
@@ -18,17 +21,42 @@ function App() {
     setType(searchParams.get("type"));
   }, []);
 
-  async function checkWalletAddr() {}
+  const handleTextChange = (e) => {
+    setIsLoading(true);
+    setAccountAddress(e.target.value);
+  };
 
   async function handleButtonClick() {
-    setIsLoading(true);
+    console.log("button clicked");
     setIsOpen(true);
-
-    // make an API call or any async operation
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    setIsLoading(false);
+    console.log({ isOpen });
   }
+
+  const checkIsRegistered = useCallback(
+    debounce(async (accountAddress) => {
+      console.log({ accountAddress });
+      const validAddress = ethers.utils.isAddress(accountAddress);
+      console.log({ validAddress });
+      setValidAddress(validAddress);
+      if (validAddress) {
+        const res = await axios.get(
+          "https://api.mumbai.croffle.me/api/v1/public/wallets/is-registered",
+          {
+            params: { accountAddress },
+          }
+        );
+        const isRegistered = res.data.data.isRegistered;
+        console.log({ isRegistered });
+        setIsRegistered(isRegistered);
+      }
+      setIsLoading(false);
+    }, 1000),
+    []
+  );
+
+  useEffect(() => {
+    checkIsRegistered(accountAddress);
+  }, [accountAddress]);
 
   return (
     <div
@@ -43,19 +71,24 @@ function App() {
           type="text"
           placeholder="KONKRIT 주소를 입력해주세요"
           className="input input-bordered w-full max-w-xs"
+          onChange={handleTextChange}
+          value={accountAddress}
         />
         <label className="label">
           <span className="label-text-alt text-white">
-            입력 account address에 대한 verify 결과 작성 예정
-            {isLoading ? (
-              <div class="flex space-x-2 animate-pulse">
-                <div class="w-1 h-1 bg-gray-500 rounded-full"></div>
-                <div class="w-1 h-1 bg-gray-500 rounded-full"></div>
-                <div class="w-1 h-1 bg-gray-500 rounded-full"></div>
-              </div>
-            ) : (
-              <div>로딩 중 아님</div>
-            )}
+            {accountAddress ? (
+              <>
+                {isLoading ? (
+                  <div>주소를 확인하고 있어요.</div>
+                ) : !validAddress ? (
+                  <div>올바른 지갑 주소가 아닙니다.</div>
+                ) : isRegistered ? (
+                  <div>KONKRIT 주소입니다.</div>
+                ) : (
+                  <div>KONKRIT 주소를 입력해주세요.</div>
+                )}
+              </>
+            ) : null}
           </span>
         </label>
       </div>
@@ -63,14 +96,11 @@ function App() {
         data-theme="bumblebee"
         className="btn btn-secondary btn-wide"
         onClick={handleButtonClick}
+        disabled={!isRegistered}
       >
         에어드랍 받기
       </button>
-      <LoadingModal
-        isOpen={isOpen}
-        isLoading={isLoading}
-        onClose={() => setIsOpen(false)}
-      />
+      {isOpen && <AirDropModal isOpen={isOpen} setIsOpen={setIsOpen} />}
     </div>
   );
 }
