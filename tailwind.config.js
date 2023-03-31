@@ -5,14 +5,16 @@ module.exports = {
     extend: {},
   },
   plugins: [require("daisyui")],
-  // daisyui: {
-  //   themes: [
-  //     {
-  //       bumblebee: {
-  //         ...require("daisyui/src/colors/themes")["[data-theme=bumblebee]"],
-  //         "secondary-content": "white",
-  //       },
-  //     },
-  //   ],
-  // },
+  daisyui: {
+    themes: [
+      {
+        bumblebee: {
+          ...require("daisyui/src/colors/themes")["[data-theme=bumblebee]"],
+          ".btn:disabled": {
+            "background-color": "#DAA520",
+          },
+        },
+      },
+    ],
+  },
 };
