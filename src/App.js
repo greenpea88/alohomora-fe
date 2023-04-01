@@ -4,6 +4,10 @@ import { useSearchParams } from "react-router-dom";
 import { debounce } from "lodash";
 import { ethers } from "ethers";
 import AirDropModal from "./components/airdropModal";
+import {
+  HeadlessModal,
+  HeadlessModalMountThenOpen,
+} from "./components/HeadlessModal";
 
 function App() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -14,6 +18,9 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [validAddress, setValidAddress] = useState(false);
+
+  const [isHeadlessModalOpen, setIsHeadlessModalOpen] = useState(false);
+  const [isHeadlessModalMounted, setIsHeadlessModalMounted] = useState(false);
 
   useEffect(() => {
     // page에 접근할 때 query param으로 들어온 값을 읽음
@@ -65,17 +72,17 @@ function App() {
         backgroundColor: "#282c34",
       }}
     >
-      <div className="form-control w-full max-w-xs">
+      <div className="w-full max-w-xs form-control">
         <label className="label"></label>
         <input
           type="text"
           placeholder="KONKRIT 주소를 입력해주세요"
-          className="input input-bordered w-full max-w-xs"
+          className="w-full max-w-xs input input-bordered"
           onChange={handleTextChange}
           value={accountAddress}
         />
         <label className="label">
-          <span className="label-text-alt text-white">
+          <span className="text-white label-text-alt">
             {accountAddress ? (
               <>
                 {isLoading ? (
@@ -101,6 +108,28 @@ function App() {
         에어드랍 받기
       </button>
       {isOpen && <AirDropModal isOpen={isOpen} setIsOpen={setIsOpen} />}
+      <hr />
+      <div className="p-4">
+        <button
+          type="button"
+          onClick={() => setIsHeadlessModalOpen(true)}
+          className="px-4 py-2 mr-2 text-sm font-medium text-white bg-black rounded-md bg-opacity-20 hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+        >
+          Open HeadlessModal
+        </button>
+
+        <button
+          onClick={() => setIsHeadlessModalMounted((v) => !v)}
+          className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md bg-opacity-20 hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+        >
+          Mount HeadlessModal
+        </button>
+      </div>
+      <HeadlessModal
+        isOpen={isHeadlessModalOpen}
+        setIsOpen={setIsHeadlessModalOpen}
+      />
+      {isHeadlessModalMounted && <HeadlessModalMountThenOpen />}
     </div>
   );
 }
