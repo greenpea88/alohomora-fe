@@ -1,8 +1,8 @@
 import axios from "axios";
-import React, { useCallback, useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { debounce } from "lodash";
 import { ethers } from "ethers";
+import { debounce } from "lodash";
+import React, { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AirDropModal from "./components/airdropModal";
 
 function App() {
@@ -65,17 +65,17 @@ function App() {
         backgroundColor: "#282c34",
       }}
     >
-      <div className="form-control w-full max-w-xs">
+      <div className="w-full max-w-xs form-control">
         <label className="label"></label>
         <input
           type="text"
           placeholder="KONKRIT 주소를 입력해주세요"
-          className="input input-bordered w-full max-w-xs"
+          className="w-full max-w-xs input input-bordered"
           onChange={handleTextChange}
           value={accountAddress}
         />
         <label className="label">
-          <span className="label-text-alt text-white">
+          <span className="text-white label-text-alt">
             {accountAddress ? (
               <>
                 {isLoading ? (
@@ -96,7 +96,7 @@ function App() {
         data-theme="bumblebee"
         className="btn btn-secondary btn-wide"
         onClick={handleButtonClick}
-        disabled={!isRegistered}
+        // disabled={!isRegistered}
       >
         에어드랍 받기
       </button>
